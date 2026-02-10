@@ -1,0 +1,1604 @@
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Taste - International Recipes</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        /* Spinner */
+        @keyframes spin { 
+            to { transform: rotate(360deg); } 
+        }
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+        /* Custom Theme Variables */
+        :root {
+            --primary-color: #ff6f61;
+            --bg-color: #f9fafb;
+        }
+
+        /* Dynamic Classes using CSS Variables */
+        .bg-theme { background-color: var(--primary-color); }
+        .text-theme { color: var(--primary-color); }
+        .border-theme { border-color: var(--primary-color); }
+        .ring-theme { --tw-ring-color: var(--primary-color); }
+        .btn-theme {
+            background-color: var(--primary-color);
+            color: white;
+            transition: all 0.2s;
+        }
+        .btn-theme:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-theme:active { transform: scale(0.98); }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #999; }
+
+        /* Animations */
+        @keyframes fade-in-up {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in { animation: fade-in-up 0.4s ease-out forwards; }
+
+        @keyframes pop-in {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .animate-pop-in { animation: pop-in 0.3s ease-out forwards; }
+
+        .transition-text { transition: opacity 0.2s ease-in-out; }
+
+        /* Utility */
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans h-screen flex flex-col overflow-hidden">
+
+    <!-- LANGUAGE SELECTION MODAL (FIRST TIME) -->
+    <div id="lang-modal" class="fixed inset-0 z-[200] bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm hidden">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-sm text-center animate-pop-in">
+            <div class="text-4xl mb-4">🌍</div>
+            <h2 class="text-xl font-bold mb-2">Choose Language</h2>
+            <p class="text-gray-500 mb-6">Pilih bahasa untuk melanjutkan</p>
+            <div class="space-y-3">
+                <button onclick="selectLanguage('id')" class="w-full py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold transition shadow-lg flex items-center justify-center gap-2">
+                    🇮🇩 Bahasa Indonesia
+                </button>
+                <button onclick="selectLanguage('en')" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition shadow-lg flex items-center justify-center gap-2">
+                    🇺🇸 English
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- AUTH SCREEN -->
+    <div id="auth-screen" class="fixed inset-0 z-[100] bg-gray-100 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md animate-pop-in relative overflow-hidden">
+            
+            <!-- LOADING OVERLAY -->
+            <div id="auth-loading" class="absolute inset-0 bg-white/90 z-20 hidden flex items-center justify-center backdrop-blur-sm">
+                <div class="flex flex-col items-center">
+                    <div class="animate-spin rounded-full h-10 w-10 border-b-4 border-theme mb-3"></div>
+                    <p class="text-gray-500 font-bold text-sm" data-i18n="processing">Processing...</p>
+                </div>
+            </div>
+
+            <div class="text-center mb-6">
+                <div class="h-16 w-16 bg-theme text-white rounded-full flex items-center justify-center text-3xl mx-auto mb-3 shadow-md">🍲</div>
+                <h1 class="text-2xl font-bold text-gray-800" data-i18n="app_title">Global Taste</h1>
+                <p class="text-gray-500 text-sm" data-i18n="app_subtitle">Join the world's kitchen</p>
+            </div>
+
+            <!-- Login Form -->
+            <div id="login-container">
+                <form onsubmit="handleLogin(event)" class="space-y-4">
+                    <div>
+                        <input type="text" id="login-name" data-i18n-placeholder="ph_username" placeholder="Username" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 ring-theme focus:outline-none transition">
+                    </div>
+                    <div class="relative">
+                        <input type="password" id="login-pass" data-i18n-placeholder="ph_password" placeholder="Password" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 ring-theme focus:outline-none transition pr-10">
+                        <button type="button" onclick="togglePassword('login-pass', 'login-eye')" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-theme focus:outline-none p-1">
+                            <span id="login-eye">👁️</span>
+                        </button>
+                    </div>
+                    
+                    <div class="flex justify-between items-center text-sm">
+                        <label class="flex items-center text-gray-500 gap-2 cursor-pointer">
+                            <input type="checkbox" class="rounded text-theme focus:ring-theme"> <span data-i18n="remember_me">Remember me</span>
+                        </label>
+                        <button type="button" onclick="switchAuth('forgot')" class="text-theme hover:underline font-medium" data-i18n="forgot_pass">Forgot Password?</button>
+                    </div>
+
+                    <p id="login-error" class="text-red-500 text-sm hidden font-medium text-center bg-red-50 p-2 rounded border border-red-100" data-i18n="error_login">Invalid credentials!</p>
+                    
+                    <button type="submit" class="w-full py-3 btn-theme rounded-lg font-bold shadow-md transform active:scale-95 transition" data-i18n="btn_login">Login</button>
+                </form>
+                <div class="mt-4 text-center text-sm text-gray-500">
+                    <span data-i18n="new_here">New here?</span> <button onclick="switchAuth('register')" class="text-theme font-bold hover:underline" data-i18n="create_account">Create Account</button>
+                </div>
+            </div>
+
+            <!-- Register Form -->
+            <div id="register-container" class="hidden">
+                <form onsubmit="handleRegister(event)" class="space-y-4">
+                    <input type="text" id="reg-name" data-i18n-placeholder="ph_username_req" placeholder="Username (Required)" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 ring-theme focus:outline-none transition">
+                    <input type="email" id="reg-email" data-i18n-placeholder="ph_email_opt" placeholder="Email (Optional)" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 ring-theme focus:outline-none transition">
+                    <div class="relative">
+                        <input type="password" id="reg-pass" data-i18n-placeholder="ph_password_req" placeholder="Password (Required)" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 ring-theme focus:outline-none transition pr-10">
+                        <button type="button" onclick="togglePassword('reg-pass', 'reg-eye')" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-theme focus:outline-none p-1">
+                            <span id="reg-eye">👁️</span>
+                        </button>
+                    </div>
+                    
+                    <p id="reg-error" class="text-red-500 text-sm hidden font-medium text-center bg-red-50 p-2 rounded border border-red-100" data-i18n="error_username">Username taken!</p>
+                    
+                    <button type="submit" class="w-full py-3 btn-theme rounded-lg font-bold shadow-md transform active:scale-95 transition" data-i18n="btn_register">Register & Login</button>
+                </form>
+                <div class="mt-4 text-center text-sm text-gray-500">
+                    <span data-i18n="have_account">Have an account?</span> <button onclick="switchAuth('login')" class="text-theme font-bold hover:underline" data-i18n="btn_login">Login</button>
+                </div>
+            </div>
+
+            <!-- Forgot Password Form -->
+            <div id="forgot-container" class="hidden">
+                <div class="text-center mb-4">
+                    <h3 class="text-lg font-bold text-gray-700" data-i18n="account_recovery">Account Recovery</h3>
+                    <p class="text-xs text-gray-500" data-i18n="recovery_desc">Enter your email to receive a recovery link.</p>
+                </div>
+                <form onsubmit="handleForgot(event)" class="space-y-4">
+                    <input type="email" id="forgot-email" data-i18n-placeholder="ph_email" placeholder="Email Address" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 ring-theme focus:outline-none transition">
+                    <button type="submit" class="w-full py-3 btn-theme rounded-lg font-bold shadow-md transform active:scale-95 transition" data-i18n="btn_send_recovery">Send Recovery Email</button>
+                </form>
+                <div class="mt-4 text-center text-sm text-gray-500">
+                    <span data-i18n="remembered">Remembered?</span> <button onclick="switchAuth('login')" class="text-theme font-bold hover:underline" data-i18n="back_login">Back to Login</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- MAIN APP -->
+    <div id="app-container" class="hidden flex-col h-full w-full">
+        
+        <!-- HEADER -->
+        <header class="bg-theme text-white shadow-md z-40 h-16 flex items-center justify-between px-4 sticky top-0">
+            <button onclick="toggleSideMenu()" class="p-2 hover:bg-white/20 rounded-full text-2xl transition">☰</button>
+            
+            <h1 class="text-xl font-bold tracking-wide flex items-center gap-2 cursor-pointer" onclick="resetHome()">
+                <img id="header-logo" src="" class="h-8 w-8 object-cover rounded-full bg-white hidden" alt="Logo">
+                <span id="header-icon" class="text-2xl">🍲</span>
+                <span id="site-title" class="truncate max-w-[150px] sm:max-w-none">Global Taste</span>
+            </h1>
+
+            <div class="flex gap-2">
+                <button onclick="toggleAddModal()" class="p-2 hover:bg-white/20 rounded-full text-2xl font-bold transition" title="Add Recipe">+</button>
+                <button onclick="resetHome()" class="p-2 hover:bg-white/20 rounded-full text-xl transition" title="Refresh Home">🏠</button>
+            </div>
+        </header>
+
+        <!-- SIDE MENU -->
+        <div id="side-menu-overlay" onclick="toggleSideMenu()" class="fixed inset-0 bg-black/50 z-40 hidden transition-opacity"></div>
+        <div id="side-menu" class="fixed top-0 left-0 h-full w-3/4 max-w-xs bg-white shadow-2xl z-50 transform -translate-x-full transition-transform duration-300 flex flex-col">
+            <div class="p-6 bg-theme text-white">
+                <h2 class="text-2xl font-bold" data-i18n="menu">Menu</h2>
+                <p class="text-sm opacity-90" id="user-display">Guest</p>
+            </div>
+            <div class="flex-1 p-4 space-y-2 overflow-y-auto">
+                <button onclick="openProfile()" class="w-full text-left p-3 hover:bg-gray-100 rounded-lg flex items-center gap-3 transition">
+                    👤 <span data-i18n="profile">Profile</span>
+                </button>
+                <div class="border-t my-2"></div>
+                <div class="px-3 text-xs font-bold text-gray-400 uppercase tracking-wide mb-1" data-i18n="language">Language</div>
+                <button onclick="selectLanguage('id'); toggleSideMenu()" class="w-full text-left p-3 hover:bg-gray-100 rounded-lg flex items-center gap-3 transition">
+                    🇮🇩 Bahasa Indonesia
+                </button>
+                <button onclick="selectLanguage('en'); toggleSideMenu()" class="w-full text-left p-3 hover:bg-gray-100 rounded-lg flex items-center gap-3 transition">
+                    🇺🇸 English
+                </button>
+                <div class="border-t my-2"></div>
+                <button onclick="openAdminLogin()" class="w-full text-left p-3 hover:bg-gray-100 rounded-lg text-theme font-medium flex items-center gap-3 transition">
+                    🔒 <span data-i18n="admin_panel">Admin Panel</span>
+                </button>
+            </div>
+            <div class="p-4 border-t">
+                <button onclick="handleLogout()" class="w-full text-left p-3 bg-red-50 text-red-600 rounded-lg font-bold hover:bg-red-100 transition flex items-center gap-3">
+                    🚪 <span data-i18n="logout">Logout</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- MAIN CONTENT -->
+        <main class="flex-1 overflow-hidden flex flex-col w-full max-w-5xl mx-auto relative">
+            <!-- Search & Filter -->
+            <div class="p-4 bg-white shadow-sm z-10 space-y-3">
+                <div class="relative">
+                    <input type="text" id="search-input" oninput="handleSearch()" class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 ring-theme transition" data-i18n-placeholder="search_ph" placeholder="Search...">
+                    <span class="absolute left-3 top-3.5 text-gray-400">🔍</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <div class="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+                        <button onclick="setFilter('all')" class="filter-chip active px-3 py-1 rounded-full text-sm border bg-gray-100 whitespace-nowrap transition" data-filter="all" data-i18n="filter_all">All</button>
+                        <button onclick="setFilter('Main Course')" class="filter-chip px-3 py-1 rounded-full text-sm border whitespace-nowrap transition" data-filter="Main Course" data-i18n="filter_main">Main Course</button>
+                        <button onclick="setFilter('Dessert')" class="filter-chip px-3 py-1 rounded-full text-sm border whitespace-nowrap transition" data-filter="Dessert" data-i18n="filter_dessert">Dessert</button>
+                    </div>
+                    <button onclick="randomizeRecipes()" class="bg-gray-800 text-white px-3 py-1.5 rounded-lg text-xs hover:bg-gray-700 transition flex items-center gap-1 shadow-sm active:scale-95">
+                        🔄 <span data-i18n="btn_refresh">Refresh</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Recipe Grid -->
+            <div id="recipe-container" class="flex-1 overflow-y-auto p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pb-24">
+                <!-- Recipes injected here -->
+            </div>
+
+            <!-- Empty State -->
+            <div id="empty-state" class="hidden absolute inset-0 flex flex-col items-center justify-center text-gray-400 pointer-events-none mt-20">
+                <span class="text-6xl mb-4">🍽️</span>
+                <p data-i18n="no_recipes">No recipes found.</p>
+            </div>
+        </main>
+    </div>
+
+    <!-- RECIPE DETAIL MODAL -->
+    <div id="detail-modal" class="fixed inset-0 z-50 bg-white hidden overflow-y-auto animate-pop-in">
+        <button onclick="closeDetail()" class="fixed top-4 right-4 z-[60] bg-black/50 text-white rounded-full p-2 hover:bg-black/70 transition">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+
+        <div class="relative h-64 sm:h-80 w-full bg-gray-200">
+            <img id="detail-img" src="" class="w-full h-full object-cover hidden">
+            <div id="detail-img-placeholder" class="w-full h-full flex items-center justify-center text-gray-400 text-6xl">🍲</div>
+            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6 pt-20">
+                <h2 id="detail-name" class="text-3xl font-bold text-white mb-1">Recipe Name</h2>
+                <div class="flex items-center text-white/90 text-sm gap-2">
+                    <span id="detail-location">Country, City</span> • 
+                    <span id="detail-type" class="bg-white/20 px-2 py-0.5 rounded text-xs">Type</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="max-w-4xl mx-auto p-6 space-y-8 pb-20">
+            <div id="detail-desc-box" class="hidden">
+                <h3 class="text-lg font-bold text-gray-800 mb-2 border-b pb-1" data-i18n="desc_title">Description</h3>
+                <p id="detail-desc" class="text-gray-600 italic leading-relaxed"></p>
+            </div>
+
+            <div>
+                <h3 class="text-lg font-bold text-gray-800 mb-3 border-b pb-1" data-i18n="ing_title">Ingredients</h3>
+                <ul id="detail-ingredients" class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-gray-700"></ul>
+            </div>
+
+            <div>
+                <h3 class="text-lg font-bold text-gray-800 mb-3 border-b pb-1" data-i18n="ins_title">Instructions</h3>
+                <div id="detail-instructions" class="text-gray-700 leading-relaxed whitespace-pre-line bg-gray-50 p-4 rounded-xl border border-gray-100"></div>
+            </div>
+
+            <div class="text-sm text-gray-400 text-center pt-8 border-t">
+                <span data-i18n="posted_by">Posted by</span> <span id="detail-author" class="font-medium text-gray-600">User</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADD RECIPE MODAL -->
+    <div id="add-modal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto animate-pop-in">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold" data-i18n="add_recipe_title">Add Recipe</h2>
+                    <button onclick="toggleAddModal()" class="text-gray-400 hover:text-gray-600 text-2xl transition">&times;</button>
+                </div>
+                <div class="bg-yellow-50 text-yellow-800 text-xs p-3 rounded mb-4 flex gap-2">
+                    <span>⚠️</span> <span data-i18n="delay_msg">Recipe will appear in public after 1 minute.</span>
+                </div>
+                <form onsubmit="saveRecipe(event)" class="space-y-3">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1" data-i18n="lbl_img">Food Image (Optional)</label>
+                        <input type="file" id="add-img" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-theme file:text-white hover:file:opacity-90">
+                    </div>
+
+                    <div><label class="block text-sm font-medium mb-1" data-i18n="lbl_name">Name *</label><input name="name" required class="w-full p-2 border rounded focus:ring-2 ring-theme outline-none"></div>
+                    
+                    <div class="grid grid-cols-2 gap-3">
+                        <div><label class="block text-sm font-medium mb-1" data-i18n="lbl_country">Country</label><input name="country" class="w-full p-2 border rounded focus:ring-2 ring-theme outline-none"></div>
+                        <div><label class="block text-sm font-medium mb-1" data-i18n="lbl_city">City</label><input name="city" class="w-full p-2 border rounded focus:ring-2 ring-theme outline-none"></div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium mb-1" data-i18n="lbl_type">Type</label>
+                        <select name="type" class="w-full p-2 border rounded focus:ring-2 ring-theme outline-none">
+                            <option value="Main Course" data-i18n="opt_main">Main Course</option>
+                            <option value="Dessert" data-i18n="opt_dessert">Dessert</option>
+                            <option value="Appetizer" data-i18n="opt_appetizer">Appetizer</option>
+                            <option value="Beverage" data-i18n="opt_beverage">Beverage</option>
+                        </select>
+                    </div>
+
+                    <div><label class="block text-sm font-medium mb-1" data-i18n="lbl_desc">Description</label><textarea name="desc" rows="2" class="w-full p-2 border rounded focus:ring-2 ring-theme outline-none"></textarea></div>
+
+                    <div><label class="block text-sm font-medium mb-1" data-i18n="lbl_ing">Ingredients (comma separated) *</label><textarea name="ingredients" required rows="2" class="w-full p-2 border rounded focus:ring-2 ring-theme outline-none"></textarea></div>
+
+                    <div><label class="block text-sm font-medium mb-1" data-i18n="lbl_ins">Instructions *</label><textarea name="instructions" required rows="4" class="w-full p-2 border rounded focus:ring-2 ring-theme outline-none"></textarea></div>
+
+                    <button type="submit" class="w-full py-3 btn-theme rounded-lg font-bold shadow-lg mt-2 transform active:scale-95 transition" data-i18n="btn_save_recipe">Save Recipe</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADMIN PANEL -->
+    <div id="admin-panel" class="fixed inset-0 bg-gray-100 z-[60] hidden overflow-y-auto">
+        <div class="bg-gray-800 text-white p-4 sticky top-0 flex justify-between items-center shadow-md z-50">
+            <h2 class="text-xl font-bold flex gap-2">🛡️ <span data-i18n="admin_dashboard">Admin Dashboard</span></h2>
+            <button onclick="closeAdminPanel()" class="text-2xl hover:text-red-400 transition">&times;</button>
+        </div>
+        <div class="max-w-5xl mx-auto p-6 space-y-6 relative">
+            <div id="admin-loading" class="absolute inset-0 bg-white/80 z-20 hidden flex items-center justify-center rounded-xl backdrop-blur-sm">
+                <div class="flex flex-col items-center">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-4 border-theme mb-3"></div>
+                    <span class="text-gray-500 font-bold" data-i18n="loading_data">Fetching Data...</span>
+                </div>
+            </div>
+
+            <div class="flex gap-4 border-b">
+                <button onclick="switchAdminTab('dashboard')" id="tab-dashboard" class="pb-2 border-b-2 border-theme font-bold px-2 transition" data-i18n="tab_dash">Dashboard</button>
+                <button onclick="switchAdminTab('users'); renderAdminUsers()" id="tab-users" class="pb-2 border-b-2 border-transparent text-gray-500 hover:text-gray-800 px-2 transition flex items-center gap-1"><span data-i18n="tab_users">User Management</span></button>
+            </div>
+
+            <div id="admin-view-dashboard" class="space-y-6">
+                <div class="bg-white p-6 rounded-xl shadow-sm border animate-pop-in">
+                    <h3 class="text-lg font-bold mb-4 border-b pb-2" data-i18n="site_settings">Site Settings</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                         <div>
+                            <label class="block text-sm font-medium mb-1" data-i18n="lbl_admin_email">Admin Email (System)</label>
+                            <input type="email" id="admin-sys-email" class="w-full p-2 border rounded focus:ring-2 ring-theme outline-none" placeholder="admin@globaltaste.com">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-1" data-i18n="lbl_site_name">Site Name</label>
+                            <input type="text" id="admin-site-name" class="w-full p-2 border rounded focus:ring-2 ring-theme outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1" data-i18n="lbl_theme_color">Theme Color</label>
+                            <input type="color" id="admin-site-color" class="h-10 w-full p-1 border rounded cursor-pointer">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1" data-i18n="lbl_logo">Logo</label>
+                            <input type="file" id="admin-site-logo" accept="image/*" class="w-full text-sm">
+                        </div>
+                    </div>
+                    <button onclick="saveAdminSettings()" class="mt-4 btn-theme px-6 py-2 rounded font-bold shadow transform active:scale-95 transition" data-i18n="btn_save_changes">Save Changes</button>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 animate-pop-in">
+                    <div class="bg-white p-4 rounded-xl shadow border-l-4 border-blue-500">
+                        <div class="text-gray-500 text-xs uppercase font-bold" data-i18n="stat_recipes">Recipes</div>
+                        <div class="text-2xl font-bold" id="stat-recipes">0</div>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl shadow border-l-4 border-green-500">
+                        <div class="text-gray-500 text-xs uppercase font-bold" data-i18n="stat_likes">Likes</div>
+                        <div class="text-2xl font-bold" id="stat-likes">0</div>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl shadow border-l-4 border-red-500">
+                        <div class="text-gray-500 text-xs uppercase font-bold" data-i18n="stat_dislikes">Dislikes</div>
+                        <div class="text-2xl font-bold" id="stat-dislikes">0</div>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl shadow border-l-4 border-purple-500">
+                        <div class="text-gray-500 text-xs uppercase font-bold" data-i18n="stat_online">Online</div>
+                        <div class="text-2xl font-bold" id="stat-online">0</div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow overflow-hidden animate-pop-in">
+                    <div class="p-4 border-b bg-gray-50 font-bold" data-i18n="recipe_mgmt">Recipe Management</div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-gray-100 text-gray-600 uppercase">
+                                <tr>
+                                    <th class="p-4" data-i18n="th_name">Name</th>
+                                    <th class="p-4" data-i18n="th_status">Status</th>
+                                    <th class="p-4 text-right" data-i18n="th_action">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-list" class="divide-y"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="admin-view-users" class="hidden space-y-6 animate-pop-in">
+                <div class="bg-white rounded-xl shadow overflow-hidden">
+                    <div class="p-4 border-b bg-gray-50 space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold flex items-center gap-2">
+                                <span data-i18n="reg_users">Registered Users</span>
+                                <span class="bg-gray-200 text-gray-700 text-xs px-2 py-0.5 rounded-full" id="admin-user-count">0</span>
+                            </span>
+                            <button onclick="exportUsers()" class="text-xs bg-gray-800 text-white px-3 py-1.5 rounded hover:bg-gray-700 transition" data-i18n="btn_export">⬇ Export CSV</button>
+                        </div>
+                        <div class="relative">
+                            <input type="text" id="admin-user-search" oninput="renderAdminUsers()" class="w-full pl-9 pr-4 py-2 text-sm border rounded-lg focus:ring-2 ring-theme focus:outline-none" placeholder="Search username, email..." data-i18n-placeholder="search_ph">
+                            <span class="absolute left-3 top-2 text-gray-400">🔍</span>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-gray-100 text-gray-600 uppercase">
+                                <tr>
+                                    <th class="p-4" data-i18n="th_username">Username</th>
+                                    <th class="p-4" data-i18n="th_email">Email</th>
+                                    <th class="p-4" data-i18n="th_created">Created At</th>
+                                    <th class="p-4" data-i18n="th_pass_hash">Password Hash</th>
+                                    <th class="p-4 text-right" data-i18n="th_actions">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-user-list" class="divide-y"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADMIN LOGIN MODAL -->
+    <div id="admin-login-modal" class="fixed inset-0 bg-black/80 z-[70] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-sm animate-pop-in relative overflow-hidden">
+            <div id="admin-auth-loading" class="absolute inset-0 bg-white/90 z-10 hidden flex items-center justify-center backdrop-blur-sm">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-theme"></div>
+            </div>
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold flex items-center gap-2">🛡️ <span data-i18n="admin_panel">Admin Panel</span></h3>
+                <button onclick="document.getElementById('admin-login-modal').classList.add('hidden')" class="text-gray-400 hover:text-red-500 text-2xl transition">&times;</button>
+            </div>
+            <p class="text-sm text-gray-500 mb-4" data-i18n="l1_desc">Enter admin password to access.</p>
+            <form onsubmit="checkAdmin(event)">
+                <input type="password" id="admin-pass-input" data-i18n-placeholder="ph_enter_pass" placeholder="Enter Password" class="w-full p-3 border rounded-lg mb-4 focus:ring-2 ring-theme outline-none">
+                <button type="submit" class="w-full py-3 btn-theme rounded-lg font-bold shadow-lg transform active:scale-95 transition" data-i18n="btn_unlock_dash">Unlock Dashboard</button>
+            </form>
+            <p id="admin-error" class="text-red-500 text-sm mt-3 hidden text-center font-bold" data-i18n="access_denied">⛔ Access Denied</p>
+        </div>
+    </div>
+
+    <!-- ADMIN ACTION SECURITY MODAL (LEVEL 3) -->
+    <div id="admin-action-modal" class="fixed inset-0 bg-black/90 z-[90] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-sm animate-pop-in border-t-4 border-red-600">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl">🔒</div>
+                <h3 class="text-xl font-bold text-gray-800" data-i18n="action_security">High Security Action</h3>
+                <p class="text-sm text-gray-500 mt-1" data-i18n="action_desc">Enter admin password to continue.</p>
+            </div>
+            <form onsubmit="confirmAdminAction(event)">
+                <input type="password" id="admin-action-pass" placeholder="Enter 'blox_blox'" class="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:ring-2 ring-red-500 outline-none text-center font-bold tracking-widest">
+                <div class="flex gap-2">
+                    <button type="button" onclick="closeAdminAction()" class="flex-1 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-bold transition" data-i18n="btn_cancel">Cancel</button>
+                    <button type="submit" class="flex-1 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-bold shadow-lg transform active:scale-95 transition" data-i18n="btn_confirm">Unlock</button>
+                </div>
+            </form>
+            <p id="admin-action-error" class="text-red-600 text-sm mt-3 hidden text-center font-bold animate-bounce" data-i18n="err_wrong_pass">⛔ Wrong Password</p>
+        </div>
+    </div>
+
+    <!-- ADMIN EDIT USER MODAL -->
+    <div id="admin-edit-user-modal" class="fixed inset-0 bg-black/60 z-[95] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-sm animate-pop-in relative">
+            <button onclick="document.getElementById('admin-edit-user-modal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">&times;</button>
+            <h3 class="text-xl font-bold mb-2 flex items-center gap-2 text-gray-800">✏️ <span data-i18n="edit_user_admin">Edit User</span></h3>
+            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 mb-4 text-xs text-yellow-700">
+                <span class="font-bold">⚠️ Warning:</span> Changing user details directly affects their login access.
+            </div>
+            <form onsubmit="saveEditedUser(event)" class="space-y-4">
+                <input type="hidden" id="edit-user-id">
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 mb-1 uppercase" data-i18n="lbl_username">Username</label>
+                    <input type="text" id="edit-user-name" required class="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 ring-theme outline-none bg-gray-50 focus:bg-white transition">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 mb-1 uppercase" data-i18n="lbl_email">Email</label>
+                    <input type="email" id="edit-user-email" class="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 ring-theme outline-none bg-gray-50 focus:bg-white transition">
+                </div>
+                <button type="submit" class="w-full py-3 btn-theme rounded-lg font-bold shadow-md transform active:scale-95 transition" data-i18n="btn_save">Save Changes</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ADMIN DELETE CONFIRM MODAL -->
+    <div id="admin-delete-modal" class="fixed inset-0 bg-black/60 z-[95] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-sm animate-pop-in border-t-4 border-red-600">
+            <div class="text-center mb-4">
+                <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-3 text-3xl">⚠️</div>
+                <h3 class="text-lg font-bold text-gray-900">Delete Account?</h3>
+                <p class="text-sm text-gray-500 mt-1">This action cannot be undone. The user will be permanently removed.</p>
+            </div>
+            <div class="bg-gray-100 p-3 rounded-lg mb-6 text-center">
+                <span class="text-xs text-gray-500 uppercase font-bold">Target User</span>
+                <div id="delete-target-name" class="font-bold text-gray-800 text-lg">Username</div>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="document.getElementById('admin-delete-modal').classList.add('hidden')" class="flex-1 py-3 bg-white border border-gray-300 text-gray-700 rounded-lg font-bold hover:bg-gray-50 transition">Cancel</button>
+                <button onclick="executeDeleteUser()" class="flex-1 py-3 bg-red-600 text-white rounded-lg font-bold hover:bg-red-700 shadow-lg transform active:scale-95 transition">Delete Account</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADMIN RESET PASSWORD MODAL -->
+    <div id="admin-reset-modal" class="fixed inset-0 bg-black/60 z-[95] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-sm animate-pop-in">
+            <h3 class="text-xl font-bold mb-2 flex items-center gap-2 text-gray-800">🔑 Reset Password</h3>
+            <p class="text-sm text-gray-500 mb-4">Enter a new password for <span id="reset-target-name" class="font-bold text-gray-800">User</span>.</p>
+            <form onsubmit="executeResetPass(event)">
+                <input type="password" id="reset-new-pass" required placeholder="New Password" class="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 ring-theme outline-none mb-4">
+                <div class="flex gap-3">
+                    <button type="button" onclick="document.getElementById('admin-reset-modal').classList.add('hidden')" class="flex-1 py-3 bg-white border border-gray-300 text-gray-700 rounded-lg font-bold hover:bg-gray-50 transition">Cancel</button>
+                    <button type="submit" class="flex-1 py-3 bg-theme text-white rounded-lg font-bold shadow-lg transform active:scale-95 transition">Reset Password</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- PROFILE MODAL -->
+    <div id="profile-modal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white p-6 rounded-xl shadow-xl w-full max-w-sm animate-pop-in">
+            <h3 class="text-xl font-bold mb-4" data-i18n="edit_profile">Edit Profile</h3>
+            <form onsubmit="updateProfile(event)" class="space-y-3">
+                <input type="text" id="prof-name" class="w-full p-2 border rounded focus:ring-2 ring-theme outline-none">
+                <input type="email" id="prof-email" class="w-full p-2 border rounded focus:ring-2 ring-theme outline-none">
+                <button type="submit" class="w-full py-2 btn-theme rounded font-bold transform active:scale-95 transition" data-i18n="btn_update">Update</button>
+            </form>
+            <button onclick="document.getElementById('profile-modal').classList.add('hidden')" class="mt-2 w-full text-gray-500 text-sm hover:underline" data-i18n="btn_cancel">Cancel</button>
+        </div>
+    </div>
+
+    <script>
+        // --- TRANSLATION DATA ---
+        const translations = {
+            en: {
+                app_title: "Global Taste",
+                app_subtitle: "Join the world's kitchen",
+                processing: "Processing...",
+                ph_username: "Username",
+                ph_password: "Password",
+                ph_username_req: "Username (Required)",
+                ph_password_req: "Password (Required)",
+                ph_email_opt: "Email (Optional)",
+                ph_email: "Email Address",
+                remember_me: "Remember me",
+                forgot_pass: "Forgot Password?",
+                error_login: "Invalid credentials!",
+                btn_login: "Login",
+                new_here: "New here?",
+                create_account: "Create Account",
+                error_username: "Username taken!",
+                btn_register: "Register & Login",
+                have_account: "Have an account?",
+                account_recovery: "Account Recovery",
+                recovery_desc: "Enter your email to receive a recovery link.",
+                btn_send_recovery: "Send Recovery Email",
+                remembered: "Remembered?",
+                back_login: "Back to Login",
+                menu: "Menu",
+                profile: "Profile",
+                language: "Language",
+                admin_panel: "Admin Panel",
+                logout: "Logout",
+                search_ph: "Search recipe, country...",
+                filter_all: "All",
+                filter_main: "Main Course",
+                filter_dessert: "Dessert",
+                btn_refresh: "Refresh",
+                no_recipes: "No recipes found.",
+                desc_title: "Description",
+                ing_title: "Ingredients",
+                ins_title: "Instructions",
+                posted_by: "Posted by",
+                add_recipe_title: "Add Recipe",
+                delay_msg: "Recipe will appear in public after 1 minute.",
+                lbl_img: "Food Image (Optional)",
+                lbl_name: "Name *",
+                lbl_country: "Country",
+                lbl_city: "City",
+                lbl_type: "Type",
+                opt_main: "Main Course",
+                opt_dessert: "Dessert",
+                opt_appetizer: "Appetizer",
+                opt_beverage: "Beverage",
+                lbl_desc: "Description",
+                lbl_ing: "Ingredients (comma separated) *",
+                lbl_ins: "Instructions *",
+                btn_save_recipe: "Save Recipe",
+                admin_dashboard: "Admin Dashboard",
+                loading_data: "Fetching Data...",
+                tab_dash: "Dashboard",
+                tab_users: "User Management",
+                site_settings: "Site Settings",
+                lbl_admin_email: "Admin Email (System)",
+                lbl_site_name: "Site Name",
+                lbl_theme_color: "Theme Color",
+                lbl_logo: "Logo",
+                btn_save_changes: "Save Changes",
+                stat_recipes: "Recipes",
+                stat_likes: "Likes",
+                stat_dislikes: "Dislikes",
+                stat_online: "Online",
+                recipe_mgmt: "Recipe Management",
+                th_name: "Name",
+                th_status: "Status",
+                th_action: "Action",
+                reg_users: "Registered Users (Database)",
+                btn_export: "⬇ Export CSV",
+                th_username: "Username",
+                th_email: "Email",
+                th_created: "Created At",
+                th_pass_hash: "Password Hash",
+                th_actions: "Actions",
+                l1_desc: "Level 1 Security: Dashboard Access",
+                ph_enter_pass: "Enter Password",
+                btn_unlock_dash: "Unlock Dashboard",
+                access_denied: "⛔ Access Denied",
+                restricted_area: "Restricted Area",
+                l2_desc: "Accessing sensitive user data requires Level 2 authorization.",
+                ph_second_pass: "Enter Second Password",
+                btn_verify_sec: "Verify Security",
+                err_incorrect_pass: "⛔ Incorrect Second Password",
+                edit_profile: "Edit Profile",
+                btn_update: "Update",
+                btn_cancel: "Cancel",
+
+                // Admin Actions
+                action_security: "High Security Action",
+                action_desc: "Enter the special admin password to proceed.",
+                ph_action_pass: "Enter 'blox_blox'",
+                btn_confirm: "Confirm",
+                err_wrong_pass: "⛔ Wrong Password",
+                edit_user_admin: "Edit User (Admin)",
+                lbl_username: "Username",
+                btn_save: "Save Changes",
+                msg_user_updated: "User updated successfully!",
+                msg_user_deleted: "User deleted successfully.",
+                
+                // Dynamic/Alerts
+                alert_welcome: "Welcome! Confirmation sent to",
+                alert_recovery: "Recovery email sent to",
+                alert_logout: "Are you sure you want to logout?",
+                alert_settings_saved: "Settings Saved to Server!",
+                status_published: "Published",
+                status_pending: "Pending",
+                btn_delete: "Delete",
+                btn_send: "📧 Send",
+                btn_reset: "🔑 Reset",
+                msg_creds_sent: "📨 SYSTEM EMAIL SENT TO:",
+                msg_confirm_reset: "Reset this user's password to 'welcome123'?",
+                msg_reset_done: "Password reset to 'welcome123'",
+                msg_confirm_del_recipe: "Delete recipe from database?",
+                msg_confirm_del_user: "Permanently delete user? This cannot be undone.",
+                msg_self_del: "Cannot delete your own active account!"
+            },
+            id: {
+                app_title: "Global Taste",
+                app_subtitle: "Dapur dunia di tangan Anda",
+                processing: "Memproses...",
+                ph_username: "Nama Pengguna",
+                ph_password: "Kata Sandi",
+                ph_username_req: "Nama Pengguna (Wajib)",
+                ph_password_req: "Kata Sandi (Wajib)",
+                ph_email_opt: "Email (Opsional)",
+                ph_email: "Alamat Email",
+                remember_me: "Ingat saya",
+                forgot_pass: "Lupa Kata Sandi?",
+                error_login: "Kredensial tidak valid!",
+                btn_login: "Masuk",
+                new_here: "Baru di sini?",
+                create_account: "Buat Akun",
+                error_username: "Nama pengguna sudah dipakai!",
+                btn_register: "Daftar & Masuk",
+                have_account: "Punya akun?",
+                account_recovery: "Pemulihan Akun",
+                recovery_desc: "Masukkan email untuk menerima tautan pemulihan.",
+                btn_send_recovery: "Kirim Email Pemulihan",
+                remembered: "Sudah ingat?",
+                back_login: "Kembali ke Masuk",
+                menu: "Menu",
+                profile: "Profil",
+                language: "Bahasa",
+                admin_panel: "Panel Admin",
+                logout: "Keluar",
+                search_ph: "Cari resep, negara...",
+                filter_all: "Semua",
+                filter_main: "Menu Utama",
+                filter_dessert: "Penutup",
+                btn_refresh: "Acak Ulang",
+                no_recipes: "Tidak ada resep ditemukan.",
+                desc_title: "Deskripsi",
+                ing_title: "Bahan-bahan",
+                ins_title: "Instruksi",
+                posted_by: "Diposting oleh",
+                add_recipe_title: "Tambah Resep",
+                delay_msg: "Resep akan muncul di publik setelah 1 menit.",
+                lbl_img: "Gambar Makanan (Opsional)",
+                lbl_name: "Nama Makanan *",
+                lbl_country: "Negara",
+                lbl_city: "Kota",
+                lbl_type: "Jenis",
+                opt_main: "Menu Utama",
+                opt_dessert: "Penutup",
+                opt_appetizer: "Pembuka",
+                opt_beverage: "Minuman",
+                lbl_desc: "Deskripsi",
+                lbl_ing: "Bahan-bahan (pisahkan koma) *",
+                lbl_ins: "Instruksi Memasak *",
+                btn_save_recipe: "Simpan Resep",
+                admin_dashboard: "Dasbor Admin",
+                loading_data: "Mengambil Data...",
+                tab_dash: "Dasbor",
+                tab_users: "Manajemen User",
+                site_settings: "Pengaturan Situs",
+                lbl_admin_email: "Email Admin (Sistem)",
+                lbl_site_name: "Nama Situs",
+                lbl_theme_color: "Warna Tema",
+                lbl_logo: "Logo",
+                btn_save_changes: "Simpan Perubahan",
+                stat_recipes: "Resep",
+                stat_likes: "Suka",
+                stat_dislikes: "Tidak Suka",
+                stat_online: "Online",
+                recipe_mgmt: "Manajemen Resep",
+                th_name: "Nama",
+                th_status: "Status",
+                th_action: "Aksi",
+                reg_users: "Pengguna Terdaftar (Database)",
+                btn_export: "⬇ Ekspor CSV",
+                th_username: "Nama Pengguna",
+                th_email: "Email",
+                th_created: "Dibuat",
+                th_pass_hash: "Hash Sandi",
+                th_actions: "Aksi",
+                l1_desc: "Keamanan Level 1: Akses Dasbor",
+                ph_enter_pass: "Masukkan Kata Sandi",
+                btn_unlock_dash: "Buka Dasbor",
+                access_denied: "⛔ Akses Ditolak",
+                restricted_area: "Area Terbatas",
+                l2_desc: "Mengakses data sensitif membutuhkan otorisasi Level 2.",
+                ph_second_pass: "Masukkan Kata Sandi Kedua",
+                btn_verify_sec: "Verifikasi Keamanan",
+                err_incorrect_pass: "⛔ Kata Sandi Kedua Salah",
+                edit_profile: "Edit Profil",
+                btn_update: "Perbarui",
+                btn_cancel: "Batal",
+
+                // Admin Actions
+                action_security: "Aksi Keamanan Tinggi",
+                action_desc: "Masukkan kata sandi admin khusus untuk melanjutkan.",
+                ph_action_pass: "Masukkan 'blox_blox'",
+                btn_confirm: "Konfirmasi",
+                err_wrong_pass: "⛔ Kata Sandi Salah",
+                edit_user_admin: "Edit Pengguna (Admin)",
+                lbl_username: "Nama Pengguna",
+                btn_save: "Simpan Perubahan",
+                msg_user_updated: "Pengguna berhasil diperbarui!",
+                msg_user_deleted: "Pengguna berhasil dihapus.",
+
+                alert_welcome: "Selamat datang! Konfirmasi dikirim ke",
+                alert_recovery: "Email pemulihan dikirim ke",
+                alert_logout: "Anda yakin ingin keluar?",
+                alert_settings_saved: "Pengaturan Disimpan ke Server!",
+                status_published: "Terbit",
+                status_pending: "Tertunda",
+                btn_delete: "Hapus",
+                btn_send: "📧 Kirim",
+                btn_reset: "🔑 Reset",
+                msg_creds_sent: "📨 EMAIL SISTEM DIKIRIM KE:",
+                msg_confirm_reset: "Reset kata sandi pengguna ini ke 'welcome123'?",
+                msg_reset_done: "Kata sandi direset ke 'welcome123'",
+                msg_confirm_del_recipe: "Hapus resep dari database?",
+                msg_confirm_del_user: "Hapus pengguna secara permanen? Ini tidak bisa dibatalkan.",
+                msg_self_del: "Tidak bisa menghapus akun sendiri yang sedang aktif!"
+            }
+        };
+
+        // --- DATA & STATE ---
+        let users = JSON.parse(localStorage.getItem('gt_users')) || [];
+        let recipes = JSON.parse(localStorage.getItem('gt_recipes')) || [];
+        let siteConfig = JSON.parse(localStorage.getItem('gt_config')) || { 
+            name: 'Global Taste', 
+            color: '#ff6f61', 
+            logo: null,
+            adminEmail: 'admin@globaltaste.com' 
+        };
+        let currentUser = null;
+        let activeFilter = 'all';
+
+        // --- LANGUAGE SYSTEM ---
+        function getLang() {
+            return localStorage.getItem('gt_lang') || 'en';
+        }
+
+        function t(key) {
+            const lang = getLang();
+            return translations[lang][key] || translations['en'][key] || key;
+        }
+
+        function applyTranslations() {
+            const lang = getLang();
+            const dict = translations[lang];
+
+            // 1. Text Content
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (dict[key]) {
+                    // Add fade animation class
+                    el.classList.add('transition-text');
+                    el.style.opacity = '0';
+                    setTimeout(() => {
+                        el.textContent = dict[key];
+                        el.style.opacity = '1';
+                    }, 200);
+                }
+            });
+
+            // 2. Placeholders
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-i18n-placeholder');
+                if (dict[key]) el.placeholder = dict[key];
+            });
+
+            // Special handling for dynamic content updates
+            updateDynamicTranslations();
+        }
+
+        function selectLanguage(lang) {
+            localStorage.setItem('gt_lang', lang);
+            document.getElementById('lang-modal').classList.add('hidden');
+            applyTranslations();
+        }
+
+        function updateDynamicTranslations() {
+            // Update admin lists if visible
+            if (!document.getElementById('admin-panel').classList.contains('hidden')) {
+                renderAdminList();
+                if(adminLevel2Unlocked) renderAdminUsers();
+            }
+        }
+
+        // --- INIT ---
+        window.addEventListener('DOMContentLoaded', () => {
+            applyConfig();
+            
+            // Language Check
+            if (!localStorage.getItem('gt_lang')) {
+                document.getElementById('lang-modal').classList.remove('hidden');
+            } else {
+                applyTranslations();
+            }
+
+            checkSession();
+            
+            if (currentUser) {
+                randomizeRecipes();
+            }
+
+            // Periodic refresh
+            setInterval(() => {
+                if(!document.getElementById('admin-panel').classList.contains('hidden')) renderAdminList();
+                if(currentUser) renderRecipes(false); 
+            }, 10000);
+        });
+
+        // --- CRYPTO UTILS ---
+        async function hashPassword(message) {
+            const msgBuffer = new TextEncoder().encode(message);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        // --- AUTH ---
+        function togglePassword(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.textContent = '🙈'; 
+            } else {
+                input.type = 'password';
+                icon.textContent = '👁️'; 
+            }
+        }
+
+        function checkSession() {
+            const sessId = localStorage.getItem('gt_session');
+            if (sessId) {
+                const user = users.find(u => u.id == sessId);
+                if (user) {
+                    currentUser = user;
+                    showApp();
+                    return;
+                }
+            }
+            showAuth();
+        }
+
+        function showAuth() {
+            document.getElementById('auth-screen').classList.remove('hidden');
+            document.getElementById('app-container').classList.add('hidden');
+            document.getElementById('app-container').classList.remove('flex');
+            
+            document.querySelectorAll('input').forEach(i => {
+                if(i.type !== 'checkbox' && i.type !== 'submit') i.value = '';
+            });
+            switchAuth('login');
+        }
+
+        function showApp() {
+            document.getElementById('auth-screen').classList.add('hidden');
+            document.getElementById('app-container').classList.remove('hidden');
+            document.getElementById('app-container').classList.add('flex');
+            updateUI();
+            renderRecipes(true);
+        }
+
+        function switchAuth(mode) {
+            const login = document.getElementById('login-container');
+            const reg = document.getElementById('register-container');
+            const forgot = document.getElementById('forgot-container');
+
+            if(login) login.classList.toggle('hidden', mode !== 'login');
+            if(reg) reg.classList.toggle('hidden', mode !== 'register');
+            if(forgot) forgot.classList.toggle('hidden', mode !== 'forgot');
+
+            document.getElementById('login-error').classList.add('hidden');
+            document.getElementById('reg-error').classList.add('hidden');
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            const name = document.getElementById('login-name').value;
+            const pass = document.getElementById('login-pass').value;
+            const loading = document.getElementById('auth-loading');
+            
+            if(loading) loading.classList.remove('hidden');
+
+            setTimeout(async () => {
+                const passHash = await hashPassword(pass);
+                const user = users.find(u => u.name === name && (u.pass === passHash || u.pass === pass));
+                
+                if(loading) loading.classList.add('hidden');
+
+                if (user) {
+                    if(user.pass !== passHash) { user.pass = passHash; saveUserDB(); }
+                    localStorage.setItem('gt_session', user.id);
+                    currentUser = user;
+                    showApp();
+                } else {
+                    const err = document.getElementById('login-error');
+                    err.classList.remove('hidden');
+                }
+            }, 800);
+        }
+
+        async function handleRegister(e) {
+            e.preventDefault();
+            const name = document.getElementById('reg-name').value;
+            const pass = document.getElementById('reg-pass').value;
+            const email = document.getElementById('reg-email').value;
+            const loading = document.getElementById('auth-loading');
+
+            if(loading) loading.classList.remove('hidden');
+
+            setTimeout(async () => {
+                if (users.find(u => u.name === name)) {
+                    if(loading) loading.classList.add('hidden');
+                    document.getElementById('reg-error').classList.remove('hidden');
+                    return;
+                }
+                
+                const passHash = await hashPassword(pass);
+                const newUser = { 
+                    id: Date.now(), 
+                    name, 
+                    pass: passHash, 
+                    email, 
+                    createdAt: new Date().toISOString() 
+                };
+                
+                users.push(newUser);
+                saveUserDB();
+                localStorage.setItem('gt_session', newUser.id);
+                currentUser = newUser;
+                
+                if(loading) loading.classList.add('hidden');
+                alert(`${t('alert_welcome')} ${email || 'your inbox'}.`);
+                showApp();
+            }, 1000);
+        }
+
+        function handleForgot(e) {
+            e.preventDefault();
+            const email = document.getElementById('forgot-email').value;
+            const loading = document.getElementById('auth-loading');
+            
+            if(loading) loading.classList.remove('hidden');
+            
+            setTimeout(() => {
+                if(loading) loading.classList.add('hidden');
+                alert(`${t('alert_recovery')} ${email}.`);
+                switchAuth('login');
+            }, 1000);
+        }
+
+        function saveUserDB() {
+            localStorage.setItem('gt_users', JSON.stringify(users));
+        }
+
+        function handleLogout() {
+            if(confirm(t('alert_logout'))) {
+                localStorage.removeItem('gt_session');
+                currentUser = null;
+                toggleSideMenu();
+                showAuth();
+            }
+        }
+
+        // --- CORE UI ---
+        function updateUI() {
+            if (currentUser) document.getElementById('user-display').textContent = `${t('posted_by').replace('Posted by','')} ${currentUser.name}`;
+            applyConfig();
+        }
+
+        function applyConfig() {
+            document.documentElement.style.setProperty('--primary-color', siteConfig.color);
+            const titleEl = document.getElementById('site-title');
+            if(titleEl) titleEl.textContent = siteConfig.name;
+            document.title = siteConfig.name;
+            const logo = document.getElementById('header-logo');
+            const icon = document.getElementById('header-icon');
+            if (siteConfig.logo) {
+                logo.src = siteConfig.logo;
+                logo.classList.remove('hidden');
+                icon.classList.add('hidden');
+            } else {
+                logo.classList.add('hidden');
+                icon.classList.remove('hidden');
+            }
+        }
+
+        function toggleSideMenu() {
+            const menu = document.getElementById('side-menu');
+            const overlay = document.getElementById('side-menu-overlay');
+            const isClosed = menu.classList.contains('-translate-x-full');
+            menu.classList.toggle('-translate-x-full', !isClosed);
+            overlay.classList.toggle('hidden', !isClosed);
+        }
+
+        function toggleAddModal() {
+            document.getElementById('add-modal').classList.toggle('hidden');
+        }
+
+        function openProfile() {
+            toggleSideMenu();
+            document.getElementById('prof-name').value = currentUser.name;
+            document.getElementById('prof-email').value = currentUser.email || '';
+            document.getElementById('profile-modal').classList.remove('hidden');
+        }
+
+        function updateProfile(e) {
+            e.preventDefault();
+            currentUser.name = document.getElementById('prof-name').value;
+            currentUser.email = document.getElementById('prof-email').value;
+            const idx = users.findIndex(u => u.id === currentUser.id);
+            if(idx > -1) users[idx] = currentUser;
+            saveUserDB();
+            document.getElementById('profile-modal').classList.add('hidden');
+            updateUI();
+        }
+
+        // --- RECIPE LOGIC ---
+        function saveRecipe(e) {
+            e.preventDefault();
+            const f = e.target;
+            const btn = f.querySelector('button[type="submit"]');
+            btn.disabled = true;
+            
+            const processSave = (imgBase64) => {
+                const recipe = {
+                    id: Date.now(),
+                    name: f.name.value,
+                    country: f.country.value,
+                    city: f.city.value,
+                    type: f.type.value,
+                    desc: f.desc.value,
+                    ingredients: f.ingredients.value.split(',').map(s => s.trim()),
+                    instructions: f.instructions.value,
+                    image: imgBase64,
+                    author: currentUser.name,
+                    userId: currentUser.id,
+                    likes: 0, dislikes: 0,
+                    createdAt: Date.now()
+                };
+                recipes.unshift(recipe);
+                localStorage.setItem('gt_recipes', JSON.stringify(recipes));
+                f.reset();
+                toggleAddModal();
+                alert(t('delay_msg'));
+                btn.disabled = false;
+                renderRecipes(false);
+            };
+
+            const file = document.getElementById('add-img').files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        const maxDim = 600;
+                        let w = img.width, h = img.height;
+                        if(w>h && w>maxDim) { h*=maxDim/w; w=maxDim; }
+                        else if(h>maxDim) { w*=maxDim/h; h=maxDim; }
+                        canvas.width = w; canvas.height = h;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, w, h);
+                        processSave(canvas.toDataURL('image/jpeg', 0.7));
+                    };
+                    img.src = ev.target.result;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                processSave(null);
+            }
+        }
+
+        function renderRecipes(shuffle = false) {
+            const container = document.getElementById('recipe-container');
+            const search = document.getElementById('search-input').value.toLowerCase();
+            const now = Date.now();
+            
+            let display = recipes.filter(r => {
+                const isPublished = (now - r.createdAt) > 60000;
+                if (!isPublished) return false;
+                
+                const matchesSearch = r.name.toLowerCase().includes(search) || 
+                                      (r.country || '').toLowerCase().includes(search) ||
+                                      (r.city || '').toLowerCase().includes(search) ||
+                                      (r.type || '').toLowerCase().includes(search);
+                const matchesFilter = activeFilter === 'all' || r.type === activeFilter;
+                return matchesSearch && matchesFilter;
+            });
+
+            if (shuffle) display = display.sort(() => Math.random() - 0.5);
+
+            container.innerHTML = '';
+            if (display.length === 0) {
+                document.getElementById('empty-state').classList.remove('hidden');
+                return;
+            }
+            document.getElementById('empty-state').classList.add('hidden');
+
+            display.forEach((r, i) => {
+                const div = document.createElement('div');
+                div.className = 'bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-xl transition-all cursor-pointer transform hover:-translate-y-1 animate-fade-in group border border-gray-100';
+                div.style.animationDelay = `${i * 0.05}s`;
+                div.onclick = (e) => {
+                    if(!e.target.closest('button')) openDetail(r.id);
+                };
+
+                const imgHtml = r.image 
+                    ? `<img src="${r.image}" class="w-full h-40 object-cover group-hover:scale-105 transition duration-500">`
+                    : `<div class="w-full h-40 bg-gray-100 flex items-center justify-center text-4xl text-gray-300">🍲</div>`;
+                
+                // Translation for type if available, else keep original
+                const typeTrans = r.type === 'Main Course' ? t('opt_main') :
+                                  r.type === 'Dessert' ? t('opt_dessert') :
+                                  r.type === 'Appetizer' ? t('opt_appetizer') :
+                                  r.type === 'Beverage' ? t('opt_beverage') : r.type;
+
+                div.innerHTML = `
+                    ${imgHtml}
+                    <div class="p-5">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="font-bold text-lg text-gray-800 line-clamp-2">${r.name}</h3>
+                            <span class="text-xs font-bold text-gray-400 border px-1.5 py-0.5 rounded ml-2 whitespace-nowrap">${typeTrans}</span>
+                        </div>
+                        <p class="text-sm text-theme font-medium mb-3">📍 ${r.city || 'Unknown'}, ${r.country || 'World'}</p>
+                        
+                        <div class="flex items-center gap-4 border-t pt-3 mt-2">
+                            <button onclick="handleLike(${r.id})" class="flex items-center gap-1 text-gray-500 hover:text-blue-500 transition text-sm font-semibold active:scale-90">
+                                👍 ${r.likes}
+                            </button>
+                            <button onclick="handleDislike(${r.id})" class="flex items-center gap-1 text-gray-500 hover:text-red-500 transition text-sm font-semibold active:scale-90">
+                                👎 ${r.dislikes}
+                            </button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        // --- RECIPE DETAIL ---
+        function openDetail(id) {
+            const r = recipes.find(i => i.id === id);
+            if(!r) return;
+
+            document.getElementById('detail-name').textContent = r.name;
+            document.getElementById('detail-location').textContent = `${r.city || 'Unknown'}, ${r.country || 'World'}`;
+            
+            const typeTrans = r.type === 'Main Course' ? t('opt_main') :
+                              r.type === 'Dessert' ? t('opt_dessert') :
+                              r.type === 'Appetizer' ? t('opt_appetizer') :
+                              r.type === 'Beverage' ? t('opt_beverage') : r.type;
+            
+            document.getElementById('detail-type').textContent = typeTrans;
+            document.getElementById('detail-desc').textContent = r.desc || '';
+            document.getElementById('detail-desc-box').classList.toggle('hidden', !r.desc);
+            document.getElementById('detail-author').textContent = r.author;
+
+            const imgEl = document.getElementById('detail-img');
+            const phEl = document.getElementById('detail-img-placeholder');
+            if(r.image) {
+                imgEl.src = r.image;
+                imgEl.classList.remove('hidden');
+                phEl.classList.add('hidden');
+            } else {
+                imgEl.classList.add('hidden');
+                phEl.classList.remove('hidden');
+            }
+
+            const ingList = document.getElementById('detail-ingredients');
+            ingList.innerHTML = r.ingredients.map(i => `<li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-theme"></span>${i}</li>`).join('');
+
+            document.getElementById('detail-instructions').textContent = r.instructions;
+
+            document.getElementById('detail-modal').classList.remove('hidden');
+        }
+
+        function closeDetail() {
+            document.getElementById('detail-modal').classList.add('hidden');
+        }
+
+        function handleLike(id) {
+            const r = recipes.find(i => i.id === id);
+            if(r) { r.likes++; saveData(); renderRecipes(false); }
+        }
+        function handleDislike(id) {
+            const r = recipes.find(i => i.id === id);
+            if(r) { r.dislikes++; saveData(); renderRecipes(false); }
+        }
+        function saveData() { localStorage.setItem('gt_recipes', JSON.stringify(recipes)); }
+        
+        function randomizeRecipes() { renderRecipes(true); document.getElementById('recipe-container').scrollTop = 0; }
+        function handleSearch() { renderRecipes(false); }
+        function setFilter(f) {
+            activeFilter = f;
+            document.querySelectorAll('.filter-chip').forEach(b => {
+                b.classList.toggle('active', b.dataset.filter === f);
+                b.classList.toggle('bg-theme', b.dataset.filter === f);
+                b.classList.toggle('text-white', b.dataset.filter === f);
+                b.classList.toggle('bg-gray-100', b.dataset.filter !== f);
+            });
+            renderRecipes(true);
+        }
+        function resetHome() {
+            document.getElementById('search-input').value = '';
+            setFilter('all');
+            randomizeRecipes();
+            closeDetail();
+        }
+
+        // --- ADMIN ---
+        
+        function openAdminLogin() { 
+            toggleSideMenu(); 
+            document.getElementById('admin-pass-input').value = '';
+            document.getElementById('admin-error').classList.add('hidden');
+            document.getElementById('admin-login-modal').classList.remove('hidden'); 
+        }
+
+        function checkAdmin(e) {
+            if(e) e.preventDefault();
+            const loading = document.getElementById('admin-auth-loading');
+            const pass = document.getElementById('admin-pass-input').value;
+            const error = document.getElementById('admin-error');
+            
+            loading.classList.remove('hidden');
+            
+            setTimeout(() => {
+                loading.classList.add('hidden');
+                if(pass === 'king2014') {
+                    document.getElementById('admin-login-modal').classList.add('hidden');
+                    openAdminPanel();
+                } else {
+                    error.classList.remove('hidden');
+                    document.getElementById('admin-pass-input').value = '';
+                }
+            }, 800);
+        }
+
+        function openAdminPanel() {
+            document.getElementById('admin-panel').classList.remove('hidden');
+            
+            const loading = document.getElementById('admin-loading');
+            loading.classList.remove('hidden');
+            
+            setTimeout(() => {
+                loading.classList.add('hidden');
+                document.getElementById('admin-site-name').value = siteConfig.name;
+                document.getElementById('admin-site-color').value = siteConfig.color;
+                document.getElementById('admin-sys-email').value = siteConfig.adminEmail || '';
+                updateStats();
+                renderAdminList();
+                if(adminLevel2Unlocked) renderAdminUsers();
+                switchAdminTab('dashboard');
+            }, 1000);
+        }
+
+        function closeAdminPanel() { 
+            document.getElementById('admin-panel').classList.add('hidden'); 
+        }
+        
+        function switchAdminTab(tab) {
+            document.getElementById('admin-view-dashboard').classList.toggle('hidden', tab !== 'dashboard');
+            document.getElementById('admin-view-users').classList.toggle('hidden', tab !== 'users');
+            
+            document.getElementById('tab-dashboard').classList.toggle('border-theme', tab === 'dashboard');
+            document.getElementById('tab-dashboard').classList.toggle('border-transparent', tab !== 'dashboard');
+            
+            document.getElementById('tab-users').classList.toggle('border-theme', tab === 'users');
+            document.getElementById('tab-users').classList.toggle('border-transparent', tab !== 'users');
+            document.getElementById('tab-users').classList.toggle('text-gray-800', tab === 'users');
+            document.getElementById('tab-users').classList.toggle('text-gray-500', tab !== 'users');
+        }
+
+        function saveAdminSettings() {
+            siteConfig.name = document.getElementById('admin-site-name').value;
+            siteConfig.color = document.getElementById('admin-site-color').value;
+            siteConfig.adminEmail = document.getElementById('admin-sys-email').value;
+            
+            const file = document.getElementById('admin-site-logo').files[0];
+            if(file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    siteConfig.logo = e.target.result;
+                    localStorage.setItem('gt_config', JSON.stringify(siteConfig));
+                    applyConfig();
+                    alert(t('alert_settings_saved'));
+                };
+                reader.readAsDataURL(file);
+            } else {
+                localStorage.setItem('gt_config', JSON.stringify(siteConfig));
+                applyConfig();
+                alert(t('alert_settings_saved'));
+            }
+        }
+
+        function updateStats() {
+            document.getElementById('stat-recipes').textContent = recipes.length;
+            document.getElementById('stat-likes').textContent = recipes.reduce((a,b)=>a+b.likes,0);
+            document.getElementById('stat-dislikes').textContent = recipes.reduce((a,b)=>a+b.dislikes,0);
+            document.getElementById('stat-online').textContent = Math.floor(Math.random() * 50) + 1;
+        }
+
+        function renderAdminList() {
+            const list = document.getElementById('admin-list');
+            list.innerHTML = '';
+            const now = Date.now();
+            recipes.forEach(r => {
+                const isPub = (now - r.createdAt) > 60000;
+                const statusText = isPub ? t('status_published') : t('status_pending');
+                const tr = document.createElement('tr');
+                tr.className = 'border-b last:border-0 hover:bg-gray-50';
+                tr.innerHTML = `
+                    <td class="p-4 font-medium">${r.name}<br><span class="text-xs text-gray-400">${r.author}</span></td>
+                    <td class="p-4"><span class="px-2 py-1 rounded text-xs font-bold ${isPub ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}">${statusText}</span></td>
+                    <td class="p-4 text-right"><button onclick="deleteRecipe(${r.id})" class="text-red-500 font-bold hover:underline">${t('btn_delete')}</button></td>
+                `;
+                list.appendChild(tr);
+            });
+        }
+
+        function renderAdminUsers() {
+            const list = document.getElementById('admin-user-list');
+            const search = document.getElementById('admin-user-search') ? document.getElementById('admin-user-search').value.toLowerCase() : '';
+            list.innerHTML = '';
+            
+            const filteredUsers = users.filter(u => 
+                u.name.toLowerCase().includes(search) || 
+                (u.email && u.email.toLowerCase().includes(search))
+            );
+
+            document.getElementById('admin-user-count').textContent = filteredUsers.length;
+
+            if(filteredUsers.length === 0) {
+                list.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-gray-400 italic">No users found</td></tr>`;
+                return;
+            }
+
+            filteredUsers.forEach(u => {
+                const date = u.createdAt ? new Date(u.createdAt).toLocaleDateString() : 'N/A';
+                const shortHash = u.pass ? (u.pass.length > 10 ? u.pass.substring(0, 8) + '...' : 'Plain') : 'N/A';
+                const tr = document.createElement('tr');
+                tr.className = 'border-b last:border-0 hover:bg-gray-50 transition-colors';
+                tr.innerHTML = `
+                    <td class="p-4 font-medium text-gray-800">${u.name}</td>
+                    <td class="p-4 text-gray-600">${u.email || '<span class="text-gray-400 italic">None</span>'}</td>
+                    <td class="p-4 text-xs text-gray-500">${date}</td>
+                    <td class="p-4 text-xs font-mono text-gray-400 bg-gray-100 rounded px-2 py-1 select-all">${shortHash}</td>
+                    <td class="p-4 text-right">
+                        <div class="flex justify-end gap-2">
+                            <button onclick="editUserInit('${u.id}')" class="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded transition" title="Edit">✏️</button>
+                            <button onclick="resetUserPassInit('${u.id}')" class="p-1.5 text-gray-500 hover:text-orange-600 hover:bg-orange-50 rounded transition" title="Reset Password">🔑</button>
+                            <button onclick="deleteUserInit(${u.id})" class="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded transition" title="Delete">🗑️</button>
+                        </div>
+                    </td>
+                `;
+                list.appendChild(tr);
+            });
+        }
+        
+
+
+        // --- ADMIN ACTION SECURITY & FLOW ---
+        let pendingActionCallback = null;
+        let pendingTargetId = null;
+
+        function requestAdminAction(callback) {
+            pendingActionCallback = callback;
+            document.getElementById('admin-action-pass').value = '';
+            document.getElementById('admin-action-error').classList.add('hidden');
+            document.getElementById('admin-action-modal').classList.remove('hidden');
+            document.getElementById('admin-action-pass').focus();
+        }
+
+        function closeAdminAction() {
+            document.getElementById('admin-action-modal').classList.add('hidden');
+            pendingActionCallback = null;
+        }
+
+        function confirmAdminAction(e) {
+            e.preventDefault();
+            const pass = document.getElementById('admin-action-pass').value;
+            if (pass === 'blox_blox') {
+                document.getElementById('admin-action-modal').classList.add('hidden');
+                // Small delay to allow modal close animation
+                setTimeout(() => {
+                    if (pendingActionCallback) pendingActionCallback();
+                    pendingActionCallback = null;
+                }, 200);
+            } else {
+                document.getElementById('admin-action-error').classList.remove('hidden');
+                document.getElementById('admin-action-pass').value = '';
+                document.getElementById('admin-action-pass').focus();
+            }
+        }
+        
+        // --- ADMIN USER ACTIONS ---
+
+        // 1. EDIT FLOW
+        function editUserInit(id) {
+            requestAdminAction(() => openEditUserModal(id));
+        }
+
+        function openEditUserModal(id) {
+            const user = users.find(u => u.id == id);
+            if(!user) return;
+            document.getElementById('edit-user-id').value = user.id;
+            document.getElementById('edit-user-name').value = user.name;
+            document.getElementById('edit-user-email').value = user.email || '';
+            document.getElementById('admin-edit-user-modal').classList.remove('hidden');
+        }
+
+        function saveEditedUser(e) {
+            e.preventDefault();
+            const id = document.getElementById('edit-user-id').value;
+            const name = document.getElementById('edit-user-name').value;
+            const email = document.getElementById('edit-user-email').value;
+
+            const idx = users.findIndex(u => u.id == id);
+            if(idx > -1) {
+                users[idx].name = name;
+                users[idx].email = email;
+                saveUserDB();
+                renderAdminUsers();
+                document.getElementById('admin-edit-user-modal').classList.add('hidden');
+                // Use a non-blocking toast/alert in a real app, sticking to prompt's simplicity preference
+                alert("✅ User account updated successfully.");
+            }
+        }
+
+        // 2. RESET PASSWORD FLOW
+        function resetUserPassInit(id) {
+            requestAdminAction(() => openResetPassModal(id));
+        }
+        
+        function openResetPassModal(id) {
+            pendingTargetId = id;
+            const user = users.find(u => u.id == id);
+            if(!user) return;
+            document.getElementById('reset-target-name').textContent = user.name;
+            document.getElementById('reset-new-pass').value = '';
+            document.getElementById('admin-reset-modal').classList.remove('hidden');
+            document.getElementById('reset-new-pass').focus();
+        }
+
+        async function executeResetPass(e) {
+            e.preventDefault();
+            const newPass = document.getElementById('reset-new-pass').value;
+            if(!newPass) return;
+            
+            const idx = users.findIndex(u => u.id == pendingTargetId);
+            if(idx > -1) {
+                const newHash = await hashPassword(newPass);
+                users[idx].pass = newHash;
+                saveUserDB();
+                renderAdminUsers();
+                document.getElementById('admin-reset-modal').classList.add('hidden');
+                alert(`✅ Password for ${users[idx].name} has been changed.`);
+            }
+        }
+
+        // 3. DELETE FLOW
+        function deleteUserInit(id) {
+             if(id === currentUser?.id) {
+                alert("❌ Cannot delete your own active account!");
+                return;
+            }
+            requestAdminAction(() => openDeleteModal(id));
+        }
+
+        function openDeleteModal(id) {
+            pendingTargetId = id;
+            const user = users.find(u => u.id == id);
+            if(!user) return;
+            document.getElementById('delete-target-name').textContent = user.name;
+            document.getElementById('admin-delete-modal').classList.remove('hidden');
+        }
+
+        function executeDeleteUser() {
+            const idx = users.findIndex(u => u.id == pendingTargetId);
+            if(idx > -1) {
+                users.splice(idx, 1);
+                saveUserDB();
+                renderAdminUsers();
+                document.getElementById('admin-delete-modal').classList.add('hidden');
+                alert("✅ User account deleted permanently.");
+            }
+        }
+
+        // Legacy Recipe Delete (keep it simple or update later)
+        function deleteRecipe(id) {
+            if(confirm(t('msg_confirm_del_recipe'))) {
+                recipes = recipes.filter(r => r.id !== id);
+                saveData();
+                renderAdminList();
+                renderRecipes(false);
+            }
+        }
+
+        function exportUsers() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(users, null, 2));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "users_backup_" + Date.now() + ".json");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        }
+    </script>
+</body>
+</html>
