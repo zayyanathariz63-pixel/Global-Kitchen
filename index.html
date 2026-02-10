@@ -1600,53 +1600,64 @@
             downloadAnchorNode.remove();
         }
     </script>
-<footer class="footer-galaxy">
-  <div class="footer-stars"></div>
-  <p>© 2026 Global Kitchen — All rights reserved</p>
-  <small>"google-site-verification"</small>
-</footer>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- GOOGLE SEARCH CONSOLE VERIFICATION -->
+<meta name="google-site-verification" content="lKd98Y2O6iMS4RCneRctmGzkuObrsz7W32sTQd-IFGA" />
+
+<title>Global Kitchen</title>
 
 <style>
-/* FOOTER ONLY — TIDAK SENTUH BODY */
-.footer-galaxy {
-  position: relative;
-  margin-top: 40px;
-  padding: 18px 12px;
+/* FIX FOOTER AGAR TIDAK KE POTONG */
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  background:color: white;
+}
+
+/* AREA KONTEN UTAMA */
+#main-content {
+  flex: 1;
+}
+
+/* GEN Z FOOTER STYLE */
+.genz-footer {
+  margin-top: auto;
+  padding: 16px;
   text-align: center;
-  font-size: 12px;
-  color: #ffffff; /* PUTIH hanya footer */
-  overflow: hidden;
-
-  /* Gen Z Gradient + Glass */
-  background: linear-gradient(135deg, rgba(120,80,255,0.18), rgba(0,0,0,0.85));
-  backdrop-filter: blur(10px);
-
-  border-top: 1px solid rgba(255,255,255,0.15);
-  box-shadow: 0 -6px 25px rgba(140,120,255,0.25);
+  font-size: 13px;
+  color: white;
+  background: linear-gradient(135deg, rgba(30,41,59,0.85), rgba(2,6,23,0.95));
+  backdrop-filter: blur(14px);
+  border-top: 1px solid rgba(255,255,255,0.12);
+  box-shadow: 0 0 25px rgba(56,189,248,0.35);
+  text-shadow: 0 0 6px rgba(255,255,255,0.35);
+  letter-spacing: 0.4px;
 }
 
-/* Glow Neon Halus */
-.footer-galaxy p,
-.footer-galaxy small {
-  position: relative;
-  z-index: 1;
-  text-shadow: 0 0 10px rgba(160,140,255,0.6);
-  font-weight: 500;
-}
-
-/* Galaxy Stars Layer */
-.footer-stars {
-  position: absolute;
-  inset: 0;
-  background: url('https://i.imgur.com/7b1YzFf.png') repeat;
-  opacity: 0.14;
-  animation: starsMove 90s linear infinite;
-  z-index: 0;
-}
-
-/* Stars Animation */
-@keyframes starsMove {
-  from { background-position: 0 0; }
-  to { background-position: -9000px 4500px; }
+/* HALUS BIAR PREMIUM */
+.genz-footer:hover {
+  box-shadow: 0 0 35px rgba(168,85,247,0.6);
+  transition: 0.3s ease;
 }
 </style>
+</head>
+
+<body>
+
+<main id="main-content">
+  <!-- SEMUA KONTEN WEB KAMU TETAP DI SINI -->
+</main>
+
+<footer class="genz-footer">
+  © 2026 Global Kitchen — All rights reserved
+</footer>
+
+</body>
+</html>
