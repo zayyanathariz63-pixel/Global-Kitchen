@@ -1606,58 +1606,34 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- GOOGLE SEARCH CONSOLE VERIFICATION -->
+<!-- GOOGLE VERIFICATION META -->
 <meta name="google-site-verification" content="lKd98Y2O6iMS4RCneRctmGzkuObrsz7W32sTQd-IFGA" />
 
 <title>Global Kitchen</title>
 
 <style>
-/* FIX FOOTER AGAR TIDAK KE POTONG */
-body {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  margin: 0;
-  background:color: white;
-}
-
-/* AREA KONTEN UTAMA */
-#main-content {
-  flex: 1;
-}
-
-/* GEN Z FOOTER STYLE */
-.genz-footer {
-  margin-top: auto;
-  padding: 16px;
-  text-align: center;
-  font-size: 13px;
+/* LABEL KECIL — TIDAK MENGUBAH UI */
+.google-verification-label {
+  position: fixed;
+  top: 4px;
+  left: 6px;
+  font-size: 9px;
   color: white;
-  background: linear-gradient(135deg, rgba(30,41,59,0.85), rgba(2,6,23,0.95));
-  backdrop-filter: blur(14px);
-  border-top: 1px solid rgba(255,255,255,0.12);
-  box-shadow: 0 0 25px rgba(56,189,248,0.35);
-  text-shadow: 0 0 6px rgba(255,255,255,0.35);
-  letter-spacing: 0.4px;
-}
-
-/* HALUS BIAR PREMIUM */
-.genz-footer:hover {
-  box-shadow: 0 0 35px rgba(168,85,247,0.6);
-  transition: 0.3s ease;
+  opacity: 0.35;
+  z-index: 9999;
+  pointer-events: none;
+  user-select: none;
 }
 </style>
 </head>
 
 <body>
 
-<main id="main-content">
-  <!-- SEMUA KONTEN WEB KAMU TETAP DI SINI -->
-</main>
+<!-- LABEL SUPER KECIL -->
+<div class="google-verification-label">google-site-verification</div>
 
-<footer class="genz-footer">
-  © 2026 Global Kitchen — All rights reserved
-</footer>
+<!-- UI KAMU TETAP DI SINI -->
+<!-- JANGAN HAPUS KONTEN ASLI WEB -->
 
 </body>
 </html>
