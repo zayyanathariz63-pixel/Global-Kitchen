@@ -1600,5 +1600,53 @@
             downloadAnchorNode.remove();
         }
     </script>
-</body>
-</html>
+<footer class="footer-galaxy">
+  <div class="footer-stars"></div>
+  <p>© 2026 Global Kitchen — All rights reserved</p>
+  <small>"google-site-verification"</small>
+</footer>
+
+<style>
+/* FOOTER ONLY — TIDAK SENTUH BODY */
+.footer-galaxy {
+  position: relative;
+  margin-top: 40px;
+  padding: 18px 12px;
+  text-align: center;
+  font-size: 12px;
+  color: #ffffff; /* PUTIH hanya footer */
+  overflow: hidden;
+
+  /* Gen Z Gradient + Glass */
+  background: linear-gradient(135deg, rgba(120,80,255,0.18), rgba(0,0,0,0.85));
+  backdrop-filter: blur(10px);
+
+  border-top: 1px solid rgba(255,255,255,0.15);
+  box-shadow: 0 -6px 25px rgba(140,120,255,0.25);
+}
+
+/* Glow Neon Halus */
+.footer-galaxy p,
+.footer-galaxy small {
+  position: relative;
+  z-index: 1;
+  text-shadow: 0 0 10px rgba(160,140,255,0.6);
+  font-weight: 500;
+}
+
+/* Galaxy Stars Layer */
+.footer-stars {
+  position: absolute;
+  inset: 0;
+  background: url('https://i.imgur.com/7b1YzFf.png') repeat;
+  opacity: 0.14;
+  animation: starsMove 90s linear infinite;
+  z-index: 0;
+}
+
+/* Stars Animation */
+@keyframes starsMove {
+  from { background-position: 0 0; }
+  to { background-position: -9000px 4500px; }
+}
+</style>
